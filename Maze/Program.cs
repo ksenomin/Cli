@@ -7,20 +7,34 @@ namespace Maze
     {
         static void Main(string[] args)
         {
-            Console.OutputEncoding = Encoding.UTF8; // Для отображения игрока
-            Console.CursorVisible = false;
+            Console.OutputEncoding = Encoding.UTF8;
 
-            Console.WriteLine("Добро пожаловать в игру Лабиринт!");
-            Console.WriteLine("Введите размер лабиринта (рекомендуется 5-15): ");
+            Console.WriteLine("Генератор лабиринта с использованием алгоритма Прима");
+            Console.WriteLine("Введите размеры лабиринта (рекомендуется нечетные числа):");
 
-            int size;
-            while (!int.TryParse(Console.ReadLine(), out size) || size < 3)
+            Console.Write("Ширина: ");
+            int width = int.Parse(Console.ReadLine());
+
+            Console.Write("Высота: ");
+            int height = int.Parse(Console.ReadLine());
+
+            // Делаем размеры нечетными для правильной работы алгоритма
+            if (width % 2 == 0)
             {
-                Console.WriteLine("Введите число больше 2: ");
+                width++;
             }
 
-            GameLogic game = new GameLogic(size, size);
-            game.Run();
+            if (height % 2 == 0)
+            {
+                height++;
+            }
+
+            // Создаем и запускаем игру
+            var game = new GameLogic(width, height);
+            game.Start();
+
+            Console.WriteLine("\nНажмите любую клавишу для выхода...");
+            Console.ReadKey();
         }
     }
 }

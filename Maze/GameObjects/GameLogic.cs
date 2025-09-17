@@ -1,117 +1,170 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Maze.GameObjects
+﻿namespace Maze.GameObjects
 {
-    public class GameLogic
+    /// <summary>
+    /// Класс для основной логики работы игры
+    /// </summary>
+    internal class GameLogic
     {
-        private Maze maze;
-        private int playerX;
-        private int playerY;
-        private ConsoleView renderer;
+        private readonly MazeGenerator mazeGenerator;
+        private readonly Player player;
+        private int exitX, exitY;
+        private bool gameRunning;
 
         public GameLogic(int width, int height)
         {
-            maze = new Maze(width, height);
-            maze.Generate();
-            renderer = new ConsoleView();
-            playerX = 0;
-            playerY = 0;
+            mazeGenerator = new MazeGenerator(width, height);
+            player = new Player();
+            gameRunning = true;
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        public void Run()
+
+        public void Start()
         {
-            while (true)
+            mazeGenerator.GenerateMaze();
+            FindExitPosition(); // Находим позицию выхода
+
+            Console.CursorVisible = false;
+            Console.OutputEncoding = System.Text.Encoding.UTF8;
+
+            while (gameRunning)
             {
-                renderer.Draw(maze, playerX, playerY);
+                DrawMaze();
 
-                var key = Console.ReadKey(true).Key;
+                if (CheckWinCondition())
+                {
+                    ShowWinMessage();
+                    break;
+                }
 
-                // Обработка движения
-                if (key == ConsoleKey.UpArrow || key == ConsoleKey.DownArrow ||
-                    key == ConsoleKey.LeftArrow || key == ConsoleKey.RightArrow)
+                HandleInput();
+            }
+        }
+
+        /// <summary>
+        /// Находит позицию выхода в лабиринте
+        /// </summary>
+        private void FindExitPosition()
+        {
+            var maze = mazeGenerator.GetMaze();
+
+            for (int x = 0; x < maze.GetLength(1); x++)
+            {
+                if (maze[maze.GetLength(0) - 1, x] == ' ')
                 {
-                    MovePlayer(key);
-                }
-                else if (key == ConsoleKey.H)
-                {
-                    ShowHint();
-                }
-                else if (key == ConsoleKey.Escape)
-                {
+                    exitX = x;
+                    exitY = maze.GetLength(0) - 1;
                     break;
                 }
             }
         }
 
         /// <summary>
-        /// Метод для движения игрока
+        /// Проверка на достижение игроком выхода
+        /// </summary>
+        private bool CheckWinCondition()
+        {
+            var playerPos = player.GetPosition();
+            return playerPos.x == exitX && playerPos.y == exitY;
+        }
+
+        /// <summary>
+        /// Показывает сообщение о победе
+        /// </summary>
+        private void ShowWinMessage()
+        {
+            Console.Clear();
+            Console.WriteLine("Поздравляю!");
+            Console.WriteLine("Вы успешно прошли лабиринт!^_^");
+            Console.WriteLine("\nНажмите любую клавишу для выхода...");
+            Console.ReadKey();
+        }
+
+        private void HandleInput()
+        {
+            var key = Console.ReadKey(true).Key;
+
+            if (key == ConsoleKey.Escape)
+            {
+                gameRunning = false;
+            }
+            else
+            {
+                MovePlayer(key);
+            }
+        }
+
+        /// <summary>
+        /// Метод обработки кнопок движения игрока
         /// </summary>
         /// <param name="key"></param>
         private void MovePlayer(ConsoleKey key)
         {
-            int newX = playerX;
-            int newY = playerY;
+            var maze = mazeGenerator.GetMaze();
+            int newX = player.X;
+            int newY = player.Y;
 
             switch (key)
             {
                 case ConsoleKey.UpArrow:
-                    if (playerY > 0 && !maze.Grid[playerY, playerX].HasTopWall)
-                    { newY--; }
-                    break;
-                case ConsoleKey.RightArrow:
-                    if (playerX < maze.Width - 1 && !maze.Grid[playerY, playerX].HasRightWall)
-                    { newX++; }
+                    newY--;
                     break;
                 case ConsoleKey.DownArrow:
-                    if (playerY < maze.Height - 1 && !maze.Grid[playerY, playerX].HasBottomWall)
-                    { newY++; }
+                    newY++;
                     break;
                 case ConsoleKey.LeftArrow:
-                    if (playerX > 0 && !maze.Grid[playerY, playerX].HasLeftWall)
-                    { newX--; }
+                    newX--;
                     break;
+                case ConsoleKey.RightArrow:
+                    newX++;
+                    break;
+                default:
+                    return;
             }
 
-            // Проверка выхода за границы лабиринта
-            if (newX >= 0 && newX < maze.Width && newY >= 0 && newY < maze.Height)
+            // проверка можно ли двигаться
+            if (newX >= 0 && newX < maze.GetLength(1) &&
+                newY >= 0 && newY < maze.GetLength(0) &&
+                maze[newY, newX] != '#')
             {
-                playerX = newX;
-                playerY = newY;
+                player.X = newX;
+                player.Y = newY;
             }
-
-            CheckWinCondition();
         }
 
         /// <summary>
-        /// Функция для проверки победы
+        /// Метод для отрисовки игровых элементов
         /// </summary>
-        private void CheckWinCondition()
+        private void DrawMaze()
         {
-            if (playerX == maze.Width - 1 && playerY == maze.Height - 1)
+            Console.Clear();
+            var maze = mazeGenerator.GetMaze();
+            var playerPos = player.GetPosition();
+
+            for (int y = 0; y < maze.GetLength(0); y++)
             {
-                Console.Clear();
-                Console.WriteLine("Поздравляем! Вы прошли лабиринт! ^_^");
-                Console.WriteLine("Нажмите любую клавишу чтобы выйти...");
-                Console.ReadKey();
-                Environment.Exit(0);
+                for (int x = 0; x < maze.GetLength(1); x++)
+                {
+                    if (x == playerPos.x && y == playerPos.y)
+                    {
+                        Console.Write('♥');
+                    }
+                    else if (x == exitX && y == exitY)
+                    {
+                        Console.Write('X');
+                    }
+                    else if (maze[y, x] == '#')
+                    {
+                        Console.Write('█');
+                    }
+                    else
+                    {
+                        Console.Write(' ');
+                    }
+                }
+                Console.WriteLine();
             }
-        }
 
-
-        /// <summary>
-        /// Функция для подсказки пути
-        /// </summary>
-        private void ShowHint()
-        {
-            Console.WriteLine("Подсказка будет реализована позже!");
-            Console.WriteLine("Нажмите любую клавишу чтобы продолжить...");
-            Console.ReadKey();
+            Console.WriteLine("\nСтрелки - двигаться, ESC - выйти");
+            Console.WriteLine($"Позиция(x:y): ({playerPos.x}:{playerPos.y})");
         }
     }
 }
