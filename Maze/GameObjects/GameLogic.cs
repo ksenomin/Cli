@@ -20,7 +20,7 @@
         public void Start()
         {
             mazeGenerator.GenerateMaze();
-            FindExitPosition(); // Находим позицию выхода
+            FindExitPosition();
 
             Console.CursorVisible = false;
             Console.OutputEncoding = System.Text.Encoding.UTF8;
@@ -75,7 +75,6 @@
             Console.WriteLine("Поздравляю!");
             Console.WriteLine("Вы успешно прошли лабиринт!^_^");
             Console.WriteLine("\nНажмите любую клавишу для выхода...");
-            Console.ReadKey();
         }
 
         private void HandleInput()
@@ -149,7 +148,7 @@
                     }
                     else if (x == exitX && y == exitY)
                     {
-                        Console.Write('X');
+                        Console.Write('✘');
                     }
                     else if (maze[y, x] == '#')
                     {
@@ -164,7 +163,6 @@
             }
 
             Console.WriteLine("\nСтрелки - двигаться, ESC - выйти");
-            Console.WriteLine($"Позиция(x:y): ({playerPos.x}:{playerPos.y})");
         }
     }
 }

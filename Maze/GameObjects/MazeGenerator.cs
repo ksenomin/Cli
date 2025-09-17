@@ -1,8 +1,7 @@
-﻿
-namespace Maze.GameObjects
+﻿namespace Maze.GameObjects
 {
     /// <summary>
-    /// Класс для генерации лабиринта при помощи алгоритма Prima
+    /// Класс для генерации лабиринта при помощи алгоритма Прима
     /// </summary>
     internal class MazeGenerator
     {
@@ -11,6 +10,11 @@ namespace Maze.GameObjects
         private readonly char[,] maze;
         private readonly Random random;
 
+        /// <summary>
+        /// Инициализирует новый экземпляр генератора лабиринта
+        /// </summary>
+        /// <param name="width"></param>
+        /// <param name="height"></param>
         public MazeGenerator(int width, int height)
         {
             this.width = width;
@@ -19,9 +23,12 @@ namespace Maze.GameObjects
             this.random = new Random();
         }
 
+        /// <summary>
+        /// Генерация лабиринта
+        /// </summary>
         public void GenerateMaze()
         {
-            // Инициализация лабиринта стенами
+            // инициализация лабиринта стенами-заглушками
             for (int y = 0; y < height; y++)
             {
                 for (int x = 0; x < width; x++)
@@ -30,7 +37,6 @@ namespace Maze.GameObjects
                 }
             }
 
-            // Выбираем случайную стартовую точку (нечетные координаты)
             int startX = random.Next(1, width - 2);
             int startY = random.Next(1, height - 2);
             startX = startX % 2 == 0 ? startX + 1 : startX;
@@ -38,40 +44,42 @@ namespace Maze.GameObjects
 
             maze[startY, startX] = ' ';
 
-            // Список граничных стен
+            // список граничных стен
             var walls = new List<(int x, int y, int fromX, int fromY)>();
             AddWalls(startX, startY, walls);
 
             while (walls.Count > 0)
             {
-                // Выбираем случайную стену
                 int randomIndex = random.Next(walls.Count);
                 var (wallX, wallY, fromX, fromY) = walls[randomIndex];
                 walls.RemoveAt(randomIndex);
 
-                // Проверяем, можно ли пройти через эту стену
                 if (IsValidWall(wallX, wallY))
                 {
-                    // Определяем клетку за стеной
+                    // определение клетки за стеной
                     int newX = 2 * wallX - fromX;
                     int newY = 2 * wallY - fromY;
 
                     if (newX >= 0 && newX < width && newY >= 0 && newY < height && maze[newY, newX] == '#')
                     {
-                        // Пробиваем стену и новую клетку
+                        // пробивает стену и новую клетку
                         maze[wallY, wallX] = ' ';
                         maze[newY, newX] = ' ';
 
-                        // Добавляем стены новой клетки
                         AddWalls(newX, newY, walls);
                     }
                 }
             }
 
-            // Создаем вход и выход
             CreateEntranceAndExit();
         }
 
+        /// <summary>
+        /// Проверка - является ли стена допустимой для пробивания
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <returns>true если стена может быть пробита, иначе false</returns>
         private bool IsValidWall(int x, int y)
         {
             if (x <= 0 || x >= width - 1 || y <= 0 || y >= height - 1)
@@ -100,9 +108,15 @@ namespace Maze.GameObjects
                 count++;
             }
 
-            return count == 1; // Стена должна граничить только с одной проходной клеткой
+            return count == 1; // стена может граничить только с одной проходной клеткой
         }
 
+        /// <summary>
+        /// Добавляет границы стены вокруг клетки в список
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <param name="walls"></param>
         private void AddWalls(int x, int y, List<(int, int, int, int)> walls)
         {
             if (x > 1)
@@ -126,9 +140,12 @@ namespace Maze.GameObjects
             }
         }
 
+        /// <summary>
+        /// Создает вход и выход в лабиринте
+        /// </summary>
         private void CreateEntranceAndExit()
         {
-            // Вход сверху
+            // вход сверху
             for (int x = 1; x < width - 1; x++)
             {
                 if (maze[1, x] == ' ')
@@ -138,7 +155,7 @@ namespace Maze.GameObjects
                 }
             }
 
-            // Выход снизу
+            // выход снизу
             for (int x = width - 2; x > 0; x--)
             {
                 if (maze[height - 2, x] == ' ')
@@ -149,6 +166,10 @@ namespace Maze.GameObjects
             }
         }
 
+        /// <summary>
+        /// Возвращает сгенерированный лабиринт в виде двумерного массива
+        /// </summary>
+        /// <returns>Двумерный массив символов</returns>
         public char[,] GetMaze() => maze;
     }
 }

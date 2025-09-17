@@ -9,16 +9,18 @@ namespace Maze
         {
             Console.OutputEncoding = Encoding.UTF8;
 
-            Console.WriteLine("Генератор лабиринта с использованием алгоритма Прима");
-            Console.WriteLine("Введите размеры лабиринта (рекомендуется нечетные числа):");
-
-            Console.Write("Ширина: ");
+            Console.WriteLine("Добро пожаловать в игру Лабиринт!");
+            Console.WriteLine("【Генератор лабиринта с использованием алгоритма Прима】");
+            Console.WriteLine();
+            Console.WriteLine("Введите размеры лабиринта (лучше нечетные числа):");
+            Console.WriteLine();
+            Console.Write("➤ Ширина: ");
             int width = int.Parse(Console.ReadLine());
 
-            Console.Write("Высота: ");
+            Console.Write("➤ Высота: ");
             int height = int.Parse(Console.ReadLine());
 
-            // Делаем размеры нечетными для правильной работы алгоритма
+            // нечетные размеры для нормальной работы алгоритма
             if (width % 2 == 0)
             {
                 width++;
@@ -29,11 +31,9 @@ namespace Maze
                 height++;
             }
 
-            // Создаем и запускаем игру
             var game = new GameLogic(width, height);
             game.Start();
 
-            Console.WriteLine("\nНажмите любую клавишу для выхода...");
             Console.ReadKey();
         }
     }

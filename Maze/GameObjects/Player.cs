@@ -15,9 +15,9 @@
         }
 
         /// <summary>
-        /// Метод, возвращающий текущую позицию игрока
+        /// Метод получения позиций игрока 
         /// </summary>
-        /// <returns></returns>
+        /// <returns>Текущие координаты позиции игрока</returns>
         public (int x, int y) GetPosition()
         {
             return (X, Y);
